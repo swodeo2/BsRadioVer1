@@ -1,0 +1,37 @@
+{
+	"folders": [
+		{
+			"path": "../../../../../../BS/Arduino/MP3RadioWifi/ARDUINO"
+		},
+		{
+			"name": "250111-194914-upesy_wroom",
+			"path": "."
+		},
+		{
+			"name": "IR_Test",
+			"path": "../../../../../../BS/Arduino/VisualStudioProject/PilotTest/IR_Test"
+		},
+		{
+			"name": "rdpRadio1",
+			"path": "../rdpRadio1"
+		}
+	],
+	"settings": {
+		"files.associations": {
+			"*.json": "json",
+			"optional": "cpp",
+			"istream": "cpp",
+			"ostream": "cpp",
+			"ratio": "cpp",
+			"system_error": "cpp",
+			"array": "cpp",
+			"functional": "cpp",
+			"tuple": "cpp",
+			"type_traits": "cpp",
+			"utility": "cpp"
+		},
+		"telemetry.editStats.showStatusBar": true,
+		"telemetry.editStats.showDecorations": true,
+		"telemetry.editStats.details.enabled": true
+	}
+}

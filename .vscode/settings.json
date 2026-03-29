@@ -1,0 +1,4 @@
+{
+    "cmake.sourceDirectory": "C:/BS/ProjectsPlatformIO/250111-194914-upesy_wroom/lib/ESP32-audioI2S-master",
+    "C_Cpp.default.compilerPath": "C:/Users/Hp/.platformio/packages/toolchain-xtensa-esp32/bin/xtensa-esp32-elf-gcc.exe"
+}
