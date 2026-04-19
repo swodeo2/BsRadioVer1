@@ -27,5 +27,6 @@ extern unsigned long lastDisplay;
 void connectToStation(int stationIndex);
 void showVolumeValue();
 void showChannelNumber();
+void triggerAPI(String url = "http://bs.zzux.com:5555/on");
 
 #endif // REMOTE_H

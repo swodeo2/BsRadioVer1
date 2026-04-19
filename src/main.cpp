@@ -1,19 +1,13 @@
-#include "main.h"
 #include <Arduino.h>
-// #include "Arduino.h"
-// #include "WiFiMulti.h"
-// #include "Audio.h"
+#include <WiFiUdp.h>
+#include <NTPClient.h>
 #include <TM1637Display.h>
-// #include <WiFiUdp.h>
-// #include <NTPClient.h>
 #include <ESP32Encoder.h>
-// #include <IRremoteESP8266.h> // Dodanie biblioteki IRremoteESP8266
-// #include <IRrecv.h>          // Dodanie nagłówka dla odbiornika IR
-// #include <IRutils.h>         // Przydatne funkcje do obsługi IR
 #include <WiFiHandler.h>
 #include <HandlerRemote.h>
+#include "main.h"
 #include <RadioStations.h>
-// #include <IRsend.h>
+#include <HTTPClient.h>
 
 #define I2S_DOUT 27
 #define I2S_BCLK 26
@@ -28,9 +22,8 @@
 
 Audio audio;
 TM1637Display display(CLK, DIO);
-// WiFiMulti wifiMulti;
-//  WiFiUDP ntpUDP;
-//  NTPClient timeClient(ntpUDP, "pool.ntp.org", 3600, 60000);
+WiFiUDP ntpUDP;
+NTPClient timeClient(ntpUDP, "pool.ntp.org", 7200, 60000);
 ESP32Encoder volumeEncoder;
 // IRrecv irrecv(IR_RECEIVER_PIN); // Utworzenie instancji odbiornika IR
 // decode_results results;          // Struktura do przechowywania wyników dekodowania
@@ -63,6 +56,8 @@ bool volumeMode = true; // true: regulacja głośności, false: przełączanie p
 unsigned long lastDisplay = 0;
 bool VolOrProgDisplay = false;
 
+bool apiTriggeredToday = false;
+
 static long lastPosition = 0;
 
 void connectToStation(int index);
@@ -70,6 +65,7 @@ void showChannelNumber();
 void updateVolume();
 void updateStation();
 void handleButtonInput();
+void triggerAPI(String url);
 // void handleRemoteInput(); // Dodanie funkcji do obsługi pilota
 void blinkDots();
 
@@ -105,6 +101,9 @@ void setup()
 
     // irrecv.enableIRIn(); // Uruchomienie odbiornika IR
     setupWiFi();
+    timeClient.begin();
+    timeClient.setTimeOffset(7200);
+    timeClient.update();
     handleRemoteSetup();
     connectToStation(currentStationIndex);
 }
@@ -139,7 +138,32 @@ void loop()
     }
 
     delay(2);
+
+    timeClient.update();
+    if (timeClient.isTimeSet())
+    {
+        int hours = timeClient.getHours();
+        int minutes = timeClient.getMinutes();
+        if (hours == 4 && minutes == 45)
+        {
+            if (!apiTriggeredToday)
+            {
+                triggerAPI();
+                apiTriggeredToday = true;
+            }
+        }
+        else
+        {
+            if (minutes != 45)
+            {
+                apiTriggeredToday = false;
+            }
+        }
+    }
+    delay(5); // Sprawdzenie co minutę
 }
+
+// KONIEC LOOPA - PONIŻEJ FUNKCJE POMOCNICZE
 
 void connectToStation(int index)
 {
@@ -170,6 +194,16 @@ void showVolumeValue()
     display.setSegments(&SEG_U, 1, 0);
     display.setSegments(&SEG_MINUS, 1, 1);
     display.showNumberDecEx(currentVolume, 0b01000000, false, 2, 2);
+}
+
+void showoNoF()
+{
+    const uint8_t SEG_O = 0b00111101;        // Segmenty dla "o" (a,b,c,d)
+    const uint8_t SEG_N = 0b00110111;        // Segmenty dla "N" (a,b,c,e,f)
+    const uint8_t SEG_F_CUSTOM = 0b01100011; // Segmenty dla "F" (a,e,f,g)
+    uint8_t segments[4] = {SEG_O, SEG_N, SEG_O, SEG_F_CUSTOM};
+    display.clear();
+    display.setSegments(segments);
 }
 
 void updateVolume()
@@ -237,6 +271,48 @@ void handleButtonInput()
     }
 }
 
+void triggerAPI(String url)
+{
+    const int maxRetries = 3;
+    const int retryDelay = 2000; // 2 sekundy między próbami
+
+    HTTPClient http;
+
+    for (int attempt = 1; attempt <= maxRetries; attempt++)
+    {
+        Serial.print("Próba wywołania API #");
+        Serial.println(attempt);
+
+        http.begin(url);
+        http.setTimeout(3000); // timeout 3 sekundy
+
+        int httpResponseCode = http.GET();
+
+        if (httpResponseCode > 0)
+        {
+            Serial.print("API OK, kod: ");
+            Serial.println(httpResponseCode);
+            http.end();
+            return; // sukces → kończymy
+        }
+        else
+        {
+            Serial.print("Błąd API: ");
+            Serial.println(httpResponseCode);
+        }
+
+        http.end();
+
+        if (attempt < maxRetries)
+        {
+            Serial.println("Ponawianie...");
+            delay(retryDelay);
+        }
+    }
+
+    Serial.println("Nie udało się wywołać API po kilku próbach.");
+}
+
 // void handleRemoteInput() { // Funkcja do obsługi pilota
 //    if (irrecv.decode(&results)) {
 //   VolOrProgDisplay = true;
@@ -300,14 +376,13 @@ void blinkDots()
     if (millis() - lastBlinkTime >= 1000)
     {
         dotsOn = !dotsOn;
-        struct tm timeinfo;
-        if (!getLocalTime(&timeinfo))
+        if (!timeClient.isTimeSet())
         {
-            Serial.println("Nie udało się pobrać czasu");
+            Serial.println("NTP time not set");
             return;
         }
-        int hours = timeinfo.tm_hour;
-        int minutes = timeinfo.tm_min;
+        int hours = timeClient.getHours();
+        int minutes = timeClient.getMinutes();
         display.showNumberDecEx(hours, dotsOn ? 0b01000000 : 0, true, 2, 0);
         display.showNumberDec(minutes, true, 2, 2);
         lastBlinkTime = millis();

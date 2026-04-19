@@ -13,7 +13,8 @@ const String radioStations[] = {
     "http://stream4.nadaje.com:15274/live",
     "http://waw.ic.smcdn.pl/4100-1.mp3",
     "https://radiostream.pl/tuba8942-1.mp3",
-    "https://ic2.smcdn.pl/3990-1.mp3"
-};
+    "https://ic2.smcdn.pl/3990-1.mp3",
+    // "https://zet.stream.smcdn.pl/zet128.mp3",
+    "https://audycje.tokfm.pl/stream"};
 
 #endif

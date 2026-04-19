@@ -7,9 +7,10 @@ extern Audio audio;
 
 void setup();
 void loop();
-void showVolumeValue(); 
+void showVolumeValue();
 void showChannelNumber();
- 
+void showoNoF();
+
 // void updateTimeDisplay();
 
 #endif
