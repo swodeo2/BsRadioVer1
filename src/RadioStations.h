@@ -15,6 +15,10 @@ const String radioStations[] = {
     "https://radiostream.pl/tuba8942-1.mp3",
     "https://ic2.smcdn.pl/3990-1.mp3",
     // "https://zet.stream.smcdn.pl/zet128.mp3",
-    "https://audycje.tokfm.pl/stream"};
+    "https://radio.garden/listen/super-nova-lodz-99-8-fm/aWo46bSl",
+    "https://discoparty.pl/?proradio-popup=1",
+    "https://zt06.cdn.eurozet.pl/zet-old.mp3?redirected=06",
+    "https://radiostream.pl/tuba10-1.mp3",
+    "https://rs9-krk2-cyfronet.rmfstream.pl/RMFMAXXX48"};
 
 #endif

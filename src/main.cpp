@@ -126,7 +126,7 @@ void loop()
         updateStation(); // Dodaj tę linię do wywołania funkcji updateStation()
     }
 
-    if (millis() - lastDisplay >= 10000)
+    if (millis() - lastDisplay >= 3000)
     {
         VolOrProgDisplay = false;
         volumeMode = true;
@@ -203,7 +203,13 @@ void showoNoF()
     const uint8_t SEG_F_CUSTOM = 0b01100011; // Segmenty dla "F" (a,e,f,g)
     uint8_t segments[4] = {SEG_O, SEG_N, SEG_O, SEG_F_CUSTOM};
     display.clear();
-    display.setSegments(segments);
+    // display.setSegments(segments);
+
+    display.setSegments(&SEG_O, 1, 0);
+    display.setSegments(&SEG_N, 1, 1);
+    display.setSegments(&SEG_F_CUSTOM, 1, 2);
+    display.setSegments(&SEG_F_CUSTOM, 1, 3);
+    // display.showNumberDecEx(currentVolume, 0b01000000, false, 2, 2);
 }
 
 void updateVolume()
@@ -313,60 +319,6 @@ void triggerAPI(String url)
     Serial.println("Nie udało się wywołać API po kilku próbach.");
 }
 
-// void handleRemoteInput() { // Funkcja do obsługi pilota
-//    if (irrecv.decode(&results)) {
-//   VolOrProgDisplay = true;
-//     lastDisplay = millis();
-//        switch (results.value) {
-//            case 0xFFC23D: // Zastąp rzeczywistym kodem przycisku głośności +
-//                 volumeMode = true;
-//               // VolOrProgDisplay = true;
-
-//                currentVolume = constrain(currentVolume + 1, 0, 21);
-//                audio.setVolume(currentVolume);
-//                showVolumeValue();
-//                Serial.print("Głośność zwiększona: ");
-//                Serial.println(currentVolume);
-//                break;
-//            case 0xFF22DD: // Zastąp rzeczywistym kodem przycisku głośności -
-//             volumeMode = true;
-//                // VolOrProgDisplay = true;
-
-//                currentVolume = constrain(currentVolume - 1, 0, 21);
-//                audio.setVolume(currentVolume);
-//                showVolumeValue();
-//                Serial.print("Głośność zmniejszona: ");
-//                Serial.println(currentVolume);
-//                break;
-//            case 0xFF629D: // Zastąp rzeczywistym kodem przycisku kanału +
-//            volumeMode = false;
-
-//                    //      VolOrProgDisplay = true;
-
-//                currentStationIndex = (currentStationIndex + 1) % numberOfStations;
-//                connectToStation(currentStationIndex);
-//                showChannelNumber();
-//                Serial.print("Przełączono na stację: ");
-//                Serial.println(currentStationIndex + 1);
-//                break;
-//            case 0xFFA857: // Zastąp rzeczywistym kodem przycisku kanału -
-//           volumeMode = false;
-//                  //           VolOrProgDisplay = true;
-//        lastDisplay = millis();
-//                currentStationIndex = (currentStationIndex - 1 + numberOfStations) % numberOfStations;
-//                connectToStation(currentStationIndex);
-//                showChannelNumber();
-//                Serial.print("Przełączono na stację: ");
-//                Serial.println(currentStationIndex + 1);
-//                break;
-//            default:
-//                Serial.print("Nieznany kod: ");
-//                Serial.println(results.value, HEX); // Wyświetlenie nieznanego kodu w formacie heksadecymalnym
-//                break;
-//        }
-//        irrecv.resume(); // Odbierz następny sygnał
-//    }
-// }
 
 void blinkDots()
 {
